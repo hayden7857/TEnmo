@@ -74,6 +74,7 @@ namespace TenmoClient
             if (menuSelection == 1)
             {
                 // View your current balance
+                //keep it clean write logic in another method
             }
 
             if (menuSelection == 2)
