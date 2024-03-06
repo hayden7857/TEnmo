@@ -57,6 +57,18 @@ namespace TenmoClient.Services
         {
             Console.WriteLine($"Your current account balance is: ${balance}");
         }
+        public void SendTEbucks(List<ApiUser> userList)
+        {
+            Console.WriteLine("| -------------- Users ------------- |"+
+                              "| Id     | Username                  |"+
+                              "| -------+---------------------------|");
+            foreach (ApiUser user in userList)
+            {
+
+            Console.WriteLine($"| {user.UserId.ToString().PadRight(7)}| {user.Username.PadRight(27)}|");
+            }
+            Console.WriteLine("|-----------------------------------|");
+        }
 
     }
 }

@@ -27,10 +27,16 @@ namespace TenmoServer.Controllers
             Account toAccount = accountDao.GetAccountById(transfer.AccountTo);
             transfer.AccountFrom = fromAccount.AccountId;
             transfer.AccountTo = toAccount.AccountId;
+            if (fromAccount.UserId != toAccount.UserId && fromAccount.Balance >= transfer.Amount && transfer.Amount > 0)
+            {
+                
             Transfer newTransfer = transferDao.CreateTransfer(transfer);
             Account senderAccount = accountDao.UpdateSenderAccount(newTransfer, fromAccount);
-            Account receiverAccount = accountDao.UpdateReceiverAccount(newTransfer, toAccount); 
+            Account receiverAccount = accountDao.UpdateReceiverAccount(newTransfer, toAccount);
             return Created($"/transfer/{newTransfer.TransferId}", newTransfer);
+            }
+            return StatusCode(400, "Could not complete transfer.");
+            
         }
     }
 }

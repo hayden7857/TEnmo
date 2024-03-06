@@ -82,8 +82,8 @@ namespace TenmoServer.DAO
         {
             IList<User> users = new List<User>();
 
-            string sql = "SELECT user_id, username, password_hash, salt FROM tenmo_user";
-
+            string sql = "SELECT user_id, username FROM tenmo_user";
+            //, password_hash, salt 
             try
             {
                 using (SqlConnection conn = new SqlConnection(connectionString))
@@ -155,6 +155,7 @@ namespace TenmoServer.DAO
             User user = new User();
             user.UserId = Convert.ToInt32(reader["user_id"]);
             user.Username = Convert.ToString(reader["username"]);
+
             user.PasswordHash = Convert.ToString(reader["password_hash"]);
             user.Salt = Convert.ToString(reader["salt"]);
             return user;

@@ -93,6 +93,9 @@ namespace TenmoClient
             if (menuSelection == 4)
             {
                 // Send TE bucks
+                List<ApiUser> userList = tenmoApiService.GetUsers();
+                console.SendTEbucks(userList);
+
             }
 
             if (menuSelection == 5)

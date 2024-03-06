@@ -15,10 +15,18 @@ namespace TenmoClient.Services
         public Account GetAccount()
         {
             RestRequest request = new RestRequest("/account");
-            IRestResponse<Account> responce = client.Get<Account>(request);
-            CheckForError(responce, "get account");
-            return responce.Data;
+            IRestResponse<Account> response = client.Get<Account>(request);
+            CheckForError(response, "get account");
+            return response.Data;
         }
+        public List<ApiUser> GetUsers()
+        {
+            RestRequest request = new RestRequest("/users");
+            IRestResponse<List<ApiUser>> response = client.Get<List<ApiUser>>(request);
+            CheckForError(response, "Get users");
+            return response.Data;
+        }
+        
         private void CheckForError(IRestResponse response, string action)
         {
 
