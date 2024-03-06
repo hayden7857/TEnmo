@@ -7,6 +7,8 @@ namespace TenmoServer.DAO
         Account GetAccountById(int id);
         Account GetAccountByUsername(string username);
         Account CreateAccount(User user);
+        Account UpdateSenderAccount(Transfer transfer, Account account);
+        Account UpdateReceiverAccount(Transfer transfer, Account account);
 
     }
 }

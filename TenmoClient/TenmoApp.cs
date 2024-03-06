@@ -75,6 +75,9 @@ namespace TenmoClient
             {
                 // View your current balance
                 //keep it clean write logic in another method
+                Account account = tenmoApiService.GetAccount();
+                console.ShowAccountBalance(account.Balance);
+                console.Pause();
             }
 
             if (menuSelection == 2)

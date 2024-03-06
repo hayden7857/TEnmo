@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq.Expressions;
 using TenmoServer.Exceptions;
 using TenmoServer.Models;
 
@@ -18,7 +19,7 @@ namespace TenmoServer.DAO
         public Account GetAccountById(int id)
         {
             Account account = new Account();
-            string sql = "Select account_id,account.user_id,balance from account"+
+            string sql = "Select account_id,account.user_id,balance from account" +
                 " join tenmo_user on tenmo_user.user_id = account.user_id where account.user_id = @user_id";
             try
             {
@@ -39,9 +40,10 @@ namespace TenmoServer.DAO
                         }
                     }
                 }
-                
 
-            }catch(DaoException ex)
+
+            }
+            catch (DaoException ex)
             {
                 throw new DaoException("unable to retreive account", ex);
             }
@@ -55,6 +57,74 @@ namespace TenmoServer.DAO
         {
             throw new NotImplementedException();
         }
+        public Account UpdateSenderAccount(Transfer transfer,Account account)
+        {
+            string sql = "update account set balance=@balance where account_id=@account_id";
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    using (SqlCommand cmd = new SqlCommand(sql, conn))
+                    {
+                        account.Balance = account.Balance - transfer.Amount;
+                        cmd.Parameters.AddWithValue("@balance", account.Balance);
+                        cmd.Parameters.AddWithValue("@account_id",account.AccountId);
+                        int count = cmd.ExecuteNonQuery();
+                        if (count == 1)
+                        {
+                            return account;
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }
+                }
+
+
+            }
+            catch (DaoException ex)
+            {
+                throw new DaoException("unable to complete transfer", ex);
+            }
+
+        }
+        public Account UpdateReceiverAccount(Transfer transfer, Account account)
+        {
+            string sql = "update account set balance=@balance where account_id=@account_id";
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    using (SqlCommand cmd = new SqlCommand(sql, conn))
+                    {
+                        account.Balance = account.Balance + transfer.Amount;
+                        cmd.Parameters.AddWithValue("@balance", account.Balance);
+                        cmd.Parameters.AddWithValue("@account_id", account.AccountId);
+                        int count = cmd.ExecuteNonQuery();
+                        if (count == 1)
+                        {
+                            return account;
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }
+                }
+
+
+            }
+            catch (DaoException ex)
+            {
+                throw new DaoException("unable to complete transfer", ex);
+            }
+
+        }
         private Account MapRowToAccount(SqlDataReader reader)
         {
             Account account = new Account();
@@ -63,6 +133,7 @@ namespace TenmoServer.DAO
             account.Balance = Convert.ToDecimal(reader["balance"]);
             return account;
         }
+
     }
 
 }
