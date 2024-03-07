@@ -91,20 +91,18 @@ namespace TenmoClient.Services
                 Console.Write($"${addTrailingZero(transfer.Amount.ToString()).PadLeft(8)}\n");
             }
 
-            //foreach (KeyValuePair<int, string[]>idAndUsername in idToUsername)
-            //{
-
-            //    Console.Write($"{idAndUsername.Key.ToString().PadRight(12)}");
-            //    if (idAndUsername.Key ==userId)
-            //    {
-            //        Console.Write($"From: {idAndUsername.Value[0].PadRight(23)}");
-            //    }
-            //    else
-            //    {
-            //        Console.Write($"To: {idAndUsername.Value[0].PadRight(23)}");
-            //    }
-            //    Console.Write($"${idAndUsername.Value[1].PadLeft(8)}\n");
-            //}
+        }
+        public void ViewTransferById(List<string> transferDetails)
+        {
+            Console.WriteLine("--------------------------------------------" +
+                "\nTransfer Details\n" +
+                "--------------------------------------------");
+            Console.WriteLine($"Id: {transferDetails[0]}");
+            Console.WriteLine($"From: {transferDetails[1]}");
+            Console.WriteLine($"To: {transferDetails[2]}");
+            Console.WriteLine($"Type: {transferDetails[3]}");
+            Console.WriteLine($"Status: {transferDetails[4]}");
+            Console.WriteLine($"Amount: ${addTrailingZero(transferDetails[5])}");
         }
         public string addTrailingZero(string amount)
         {

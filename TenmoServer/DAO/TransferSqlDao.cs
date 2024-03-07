@@ -52,6 +52,45 @@ namespace TenmoServer.DAO
 
         }
 
+        public Transfer CreateTransferRequest(Transfer transfer)
+        {
+            Transfer newTransfer = new Transfer();
+            string sql = "INSERT INTO transfer (transfer_type_id, transfer_status_id,account_from,account_to,amount) " +
+                "OUTPUT INSERTED.transfer_id " +
+                "VALUES (1, 1,@account_from,@account_to,@amount)";
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    // create user
+                    SqlCommand cmd = new SqlCommand(sql, conn);
+                    cmd.Parameters.AddWithValue("@account_from", transfer.AccountFrom);
+                    cmd.Parameters.AddWithValue("@account_to", transfer.AccountTo);
+                    cmd.Parameters.AddWithValue("@amount", transfer.Amount);
+
+                    newTransfer.TransferId = Convert.ToInt32(cmd.ExecuteScalar());
+                    newTransfer.TransferStatusId = 1;
+                    newTransfer.TransferTypeId = 1;
+                    newTransfer.AccountFrom = transfer.AccountFrom;
+                    newTransfer.AccountTo = transfer.AccountTo;
+                    newTransfer.Amount = transfer.Amount;
+
+
+                }
+
+            }
+            catch (SqlException ex)
+            {
+                throw new DaoException("SQL exception occurred", ex);
+            }
+
+            return newTransfer;
+
+        }
+
         public IList<Transfer> ListCurrentUserTransfer(Account user)
         {
             IList<Transfer> transfers = new List<Transfer>();

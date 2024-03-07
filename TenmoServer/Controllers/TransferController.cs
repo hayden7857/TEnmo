@@ -14,7 +14,7 @@ namespace TenmoServer.Controllers
         private readonly IUserDao userDao;
         private readonly IAccountDao accountDao;
         private readonly ITransferDao transferDao;
-        public TransferController(IUserDao userDao, IAccountDao accountDao,ITransferDao transferDao)
+        public TransferController(IUserDao userDao, IAccountDao accountDao, ITransferDao transferDao)
         {
             this.accountDao = accountDao;
             this.userDao = userDao;
@@ -25,21 +25,33 @@ namespace TenmoServer.Controllers
         public ActionResult PostTransferOut(Transfer transfer)
         {
             User user = userDao.GetUserByUsername(User.Identity.Name);
-            Account fromAccount = accountDao.GetAccountById(user.UserId);
+            int fromAccountUserId = transfer.AccountFrom;
+            int toAccountUserId = transfer.AccountTo;
+            Account fromAccount = accountDao.GetAccountById(transfer.AccountFrom);
             Account toAccount = accountDao.GetAccountById(transfer.AccountTo);
             transfer.AccountFrom = fromAccount.AccountId;
             transfer.AccountTo = toAccount.AccountId;
-            if (fromAccount.UserId != toAccount.UserId && fromAccount.Balance >= transfer.Amount && transfer.Amount > 0)
+            if (transfer.TransferTypeId == 2 && fromAccount.UserId != toAccount.UserId && fromAccount.Balance >= transfer.Amount && transfer.Amount > 0)
             {
-                
-            Transfer newTransfer = transferDao.CreateTransfer(transfer);
-            Account senderAccount = accountDao.UpdateSenderAccount(newTransfer, fromAccount);
-            Account receiverAccount = accountDao.UpdateReceiverAccount(newTransfer, toAccount);
-            return Created($"/transfer/{newTransfer.TransferId}", newTransfer);
+
+                Transfer newTransfer = transferDao.CreateTransfer(transfer);
+                Account senderAccount = accountDao.UpdateSenderAccount(newTransfer, fromAccount);
+                Account receiverAccount = accountDao.UpdateReceiverAccount(newTransfer, toAccount);
+                newTransfer.AccountFrom = fromAccountUserId;
+                newTransfer.AccountTo = toAccountUserId;
+                return Created($"/transfer/{newTransfer.TransferId}", newTransfer);
+            }
+            else if (transfer.TransferTypeId == 1 && fromAccount.UserId != toAccount.UserId && transfer.Amount > 0)
+            {
+                Transfer newTransfer = transferDao.CreateTransferRequest(transfer);
+                newTransfer.AccountFrom = fromAccountUserId;
+                newTransfer.AccountTo = toAccountUserId;
+                return Created($"/transfer/{newTransfer.TransferId}", newTransfer);
             }
             return StatusCode(400, "Could not complete transfer.");
-            
+
         }
+
         [Authorize]
         [HttpGet]
         public ActionResult<List<Transfer>> GetTransfers()
@@ -48,7 +60,7 @@ namespace TenmoServer.Controllers
             try
             {
                 transferList = transferDao.ListCurrentUserTransfer(accountDao.GetAccountByUsername(User.Identity.Name));
-                foreach(Transfer transfer in transferList)
+                foreach (Transfer transfer in transferList)
                 {
                     Account fromAccount = accountDao.GetAccountByAccountId(transfer.AccountFrom);
                     Account toAccount = accountDao.GetAccountByAccountId(transfer.AccountTo);
@@ -70,11 +82,25 @@ namespace TenmoServer.Controllers
             try
             {
                 Transfer transfer = transferDao.GetTransferById(id);
-                return Ok(transfer);
+                Account fromAccount = accountDao.GetAccountByAccountId(transfer.AccountFrom);
+                Account toAccount = accountDao.GetAccountByAccountId(transfer.AccountTo);
+                transfer.AccountTo = toAccount.UserId;
+                transfer.AccountFrom = fromAccount.UserId;
+                int userId = userDao.GetUserByUsername(User.Identity.Name).UserId;
+                if (userId == transfer.AccountFrom || userId == transfer.AccountTo)
+                {
 
-            }catch(DaoException ex)
+                    return Ok(transfer);
+                }
+                else
+                {
+                    return Unauthorized("Unauthorized request.");
+                }
+
+            }
+            catch (DaoException ex)
             {
-                return NotFound();    
+                return NotFound();
             }
 
         }

@@ -84,24 +84,8 @@ namespace TenmoClient
             if (menuSelection == 2)
             {
                 // View your past transfers
-                List<Transfer> transferList = tenmoApiService.GetPreviousTransfers();
-                Dictionary<int, string[]> idToUsername = new Dictionary<int, string[]>(); 
-                foreach(Transfer transfer in transferList)
-                {
-                    if (transfer.AccountFrom == tenmoApiService.UserId)
-                    {
-                        idToUsername[transfer.TransferId] = new string[] { tenmoApiService.GetUserById(transfer.AccountTo).Username, transfer.Amount.ToString() };
-
-                    }
-                    else
-                    {
-                        idToUsername[transfer.TransferId] = new string[] { tenmoApiService.GetUserById(transfer.AccountFrom).Username, transfer.Amount.ToString() };
-
-                    }
-                }
-                console.ViewPreviousTransfers(idToUsername,transferList,tenmoApiService.UserId);
-                int transferId=console.PromptForInteger("Please enter transfer ID to view details (0 to cancel): ");
-                
+                ViewPreviousTransfers();
+                GetPreviousTransferById();
             }
 
             if (menuSelection == 3)
@@ -118,6 +102,12 @@ namespace TenmoClient
             if (menuSelection == 5)
             {
                 // Request TE bucks
+                List<ApiUser> userList = GetApiUsers();
+                console.SendTEbucks(userList);
+                int userIdForRequest= console.PromptForInteger("Id of the user you are requesting from[0 to cancel]:");
+                decimal requestAmount = console.PromptForDecimal("Enter amount to request:");
+
+
             }
 
             if (menuSelection == 6)
@@ -182,7 +172,7 @@ namespace TenmoClient
             }
             console.Pause();
         }
-        public void TransferOut()
+        public List<ApiUser> GetApiUsers()
         {
             ApiUser currentUser = null;
             List<ApiUser> userList = tenmoApiService.GetUsers();
@@ -195,8 +185,18 @@ namespace TenmoClient
                     break;
                 }
             }
+            return userList;
+        }
+        public void TransferOut()
+        {
+            ApiUser currentUser = null;
+            List<ApiUser> userList = GetApiUsers();
             console.SendTEbucks(userList);
             int enteredUserId = console.PromptForInteger("Enter User Id for receicpient. Cannot be your account 0 to cancle");
+            if (enteredUserId == 0)
+            {
+                return;
+            }
             decimal enteredAmount = console.PromptForDecimal("Enter amount to send. Must be greater than 0 and less than current account balance");
             Transfer newTransfer = new Transfer();
             newTransfer.AccountFrom = currentUser.UserId;
@@ -214,6 +214,60 @@ namespace TenmoClient
                 console.Pause("Unable to complete transfer.");
             }
 
+        }
+        public void ViewPreviousTransfers()
+        {
+            List<Transfer> transferList = tenmoApiService.GetPreviousTransfers();
+            Dictionary<int, string[]> idToUsername = new Dictionary<int, string[]>();
+            foreach (Transfer transfer in transferList)
+            {
+                if (transfer.AccountFrom == tenmoApiService.UserId)
+                {
+                    idToUsername[transfer.TransferId] = new string[] { tenmoApiService.GetUserById(transfer.AccountTo).Username, transfer.Amount.ToString() };
+
+                }
+                else
+                {
+                    idToUsername[transfer.TransferId] = new string[] { tenmoApiService.GetUserById(transfer.AccountFrom).Username, transfer.Amount.ToString() };
+
+                }
+            }
+            console.ViewPreviousTransfers(idToUsername, transferList, tenmoApiService.UserId);
+        }
+        public void GetPreviousTransferById()
+        {
+            int transferId = console.PromptForInteger("Please enter transfer ID to view details (0 to cancel): ");
+            Transfer retreivedTransfer = tenmoApiService.GetTransferById(transferId);
+            List<string> transferDetails = new List<string>();
+            transferDetails.Add(retreivedTransfer.TransferId.ToString());
+
+            transferDetails.Add(tenmoApiService.GetUserById(retreivedTransfer.AccountFrom).Username);
+            transferDetails.Add(tenmoApiService.GetUserById(retreivedTransfer.AccountTo).Username);
+            switch (retreivedTransfer.TransferTypeId)
+            {
+                case 1:
+                    transferDetails.Add("Request");
+                    break;
+                case 2:
+                    transferDetails.Add("Send");
+                    break;
+
+            }
+            switch (retreivedTransfer.TransferStatusId)
+            {
+                case 1:
+                    transferDetails.Add("Pending");
+                    break;
+                case 2:
+                    transferDetails.Add("Approved");
+                    break;
+                case 3:
+                    transferDetails.Add("Rejected");
+                    break;
+            }
+            transferDetails.Add(retreivedTransfer.Amount.ToString());
+            console.ViewTransferById(transferDetails);
+            console.Pause();
         }
     }
 }

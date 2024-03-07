@@ -50,6 +50,13 @@ namespace TenmoClient.Services
             CheckForError(response, "Get users");
             return response.Data;
         }
+        public Transfer GetTransferById(int id)
+        {
+            RestRequest request = new RestRequest($"/transfer/{id}");
+            IRestResponse<Transfer> response = client.Get<Transfer>(request);
+            CheckForError(response, "Get Transfer by Id");
+            return response.Data;
+        }
         private void CheckForError(IRestResponse response, string action)
         {
 

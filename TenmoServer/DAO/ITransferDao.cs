@@ -8,5 +8,6 @@ namespace TenmoServer.DAO
         Transfer CreateTransfer(Transfer transfer);
         IList<Transfer> ListCurrentUserTransfer(Account user);
         Transfer GetTransferById(int id);
+        Transfer CreateTransferRequest(Transfer transfer);
     }
 }
