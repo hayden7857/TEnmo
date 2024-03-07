@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using TenmoServer.DAO;
+using TenmoServer.Exceptions;
 using TenmoServer.Models;
 
 namespace TenmoServer.Controllers
@@ -37,6 +39,44 @@ namespace TenmoServer.Controllers
             }
             return StatusCode(400, "Could not complete transfer.");
             
+        }
+        [Authorize]
+        [HttpGet]
+        public ActionResult<List<Transfer>> GetTransfers()
+        {
+            IList<Transfer> transferList = new List<Transfer>();
+            try
+            {
+                transferList = transferDao.ListCurrentUserTransfer(accountDao.GetAccountByUsername(User.Identity.Name));
+                foreach(Transfer transfer in transferList)
+                {
+                    Account fromAccount = accountDao.GetAccountByAccountId(transfer.AccountFrom);
+                    Account toAccount = accountDao.GetAccountByAccountId(transfer.AccountTo);
+                    transfer.AccountTo = toAccount.UserId;
+                    transfer.AccountFrom = fromAccount.UserId;
+                }
+
+            }
+            catch (DaoException ex)
+            {
+                return StatusCode(400, "Could not get transfer list");
+            }
+            return Ok(transferList);
+        }
+        [Authorize]
+        [HttpGet("{id}")]
+        public ActionResult<Transfer> GetTransfer(int id)
+        {
+            try
+            {
+                Transfer transfer = transferDao.GetTransferById(id);
+                return Ok(transfer);
+
+            }catch(DaoException ex)
+            {
+                return NotFound();    
+            }
+
         }
     }
 }

@@ -32,5 +32,22 @@ namespace TenmoServer.Controllers
             }
             return Ok(userList);
         }
+        [Authorize]
+        [HttpGet("{id}")]
+        public ActionResult<User> GetUserById(int id)
+        {
+            User user = new User();
+            try
+            {
+                user = userDao.GetUserById(id);
+                user.PasswordHash = null;
+                user.Salt = null;
+            }
+            catch (DaoException ex)
+            {
+                return StatusCode(400, "Could not get user");
+            }
+            return Ok(user);
+        }
     }
 }

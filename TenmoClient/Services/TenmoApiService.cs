@@ -1,5 +1,6 @@
 ﻿using RestSharp;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using TenmoClient.Models;
 
@@ -21,12 +22,34 @@ namespace TenmoClient.Services
         }
         public List<ApiUser> GetUsers()
         {
-            RestRequest request = new RestRequest("/users");
+            RestRequest request = new RestRequest("/user");
             IRestResponse<List<ApiUser>> response = client.Get<List<ApiUser>>(request);
             CheckForError(response, "Get users");
             return response.Data;
         }
+        public ApiUser GetUserById(int id)
+        {
+            RestRequest request = new RestRequest($"/user/{id}");
+            IRestResponse<ApiUser> response = client.Get<ApiUser>(request);
+            CheckForError(response, "Get user by Id");
+            return response.Data;
+        }
+        public Transfer PostTransferOut(Transfer transfer)
+        {
+            RestRequest request = new RestRequest("/transfer");
+            request.AddJsonBody(transfer);
+            IRestResponse<Transfer> response = client.Post<Transfer>(request);
+            CheckForError(response, "Post transfer out incomplete");
+            return (response.Data);
+        }
         
+        public List<Transfer> GetPreviousTransfers()
+        {
+            RestRequest request = new RestRequest("/transfer");
+            IRestResponse<List<Transfer>> response = client.Get<List<Transfer>>(request);
+            CheckForError(response, "Get users");
+            return response.Data;
+        }
         private void CheckForError(IRestResponse response, string action)
         {
 

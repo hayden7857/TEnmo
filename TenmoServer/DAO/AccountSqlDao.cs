@@ -49,9 +49,71 @@ namespace TenmoServer.DAO
             }
             return account;
         }
+        public Account GetAccountByAccountId(int id)
+        {
+            Account account = new Account();
+            string sql = "Select account_id,account.user_id,balance from account" +
+                " join tenmo_user on tenmo_user.user_id = account.user_id where account.account_id = @account_id";
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    using (SqlCommand cmd = new SqlCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@account_id", id);
+
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                account = MapRowToAccount(reader);
+                            }
+                        }
+                    }
+                }
+
+
+            }
+            catch (DaoException ex)
+            {
+                throw new DaoException("unable to retreive account", ex);
+            }
+            return account;
+        }
         public Account GetAccountByUsername(string username)
         {
-            throw new NotImplementedException();
+            Account account = new Account();
+            string sql = "Select account_id,account.user_id,balance from account" +
+                " join tenmo_user on tenmo_user.user_id = account.user_id where tenmo_user.username=@username";
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    using (SqlCommand cmd = new SqlCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@username",username );
+
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                account = MapRowToAccount(reader);
+                            }
+                        }
+                    }
+                }
+
+
+            }
+            catch (DaoException ex)
+            {
+                throw new DaoException("unable to retreive account", ex);
+            }
+            return account;
         }
         public Account CreateAccount(User user)
         {

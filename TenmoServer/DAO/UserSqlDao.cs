@@ -95,7 +95,7 @@ namespace TenmoServer.DAO
 
                     while (reader.Read())
                     {
-                        User user = MapRowToUser(reader);
+                        User user = MapRowToUserGetUsers(reader);
                         users.Add(user);
                     }
                 }
@@ -104,7 +104,6 @@ namespace TenmoServer.DAO
             {
                 throw new DaoException("SQL exception occurred", ex);
             }
-
             return users;
         }
 
@@ -160,5 +159,14 @@ namespace TenmoServer.DAO
             user.Salt = Convert.ToString(reader["salt"]);
             return user;
         }
+        //make new maprow to user without password hash or salt
+        private User MapRowToUserGetUsers(SqlDataReader reader)
+        {
+            User user = new User();
+            user.UserId = Convert.ToInt32(reader["user_id"]);
+            user.Username = Convert.ToString(reader["username"]);
+            return user;
+        }
     }
+
 }

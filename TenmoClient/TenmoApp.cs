@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using TenmoClient.Models;
 using TenmoClient.Services;
 
@@ -83,6 +84,24 @@ namespace TenmoClient
             if (menuSelection == 2)
             {
                 // View your past transfers
+                List<Transfer> transferList = tenmoApiService.GetPreviousTransfers();
+                Dictionary<int, string[]> idToUsername = new Dictionary<int, string[]>(); 
+                foreach(Transfer transfer in transferList)
+                {
+                    if (transfer.AccountFrom == tenmoApiService.UserId)
+                    {
+                        idToUsername[transfer.TransferId] = new string[] { tenmoApiService.GetUserById(transfer.AccountTo).Username, transfer.Amount.ToString() };
+
+                    }
+                    else
+                    {
+                        idToUsername[transfer.TransferId] = new string[] { tenmoApiService.GetUserById(transfer.AccountFrom).Username, transfer.Amount.ToString() };
+
+                    }
+                }
+                console.ViewPreviousTransfers(idToUsername,transferList,tenmoApiService.UserId);
+                int transferId=console.PromptForInteger("Please enter transfer ID to view details (0 to cancel): ");
+                
             }
 
             if (menuSelection == 3)
@@ -93,9 +112,7 @@ namespace TenmoClient
             if (menuSelection == 4)
             {
                 // Send TE bucks
-                List<ApiUser> userList = tenmoApiService.GetUsers();
-                console.SendTEbucks(userList);
-
+                TransferOut();
             }
 
             if (menuSelection == 5)
@@ -164,6 +181,39 @@ namespace TenmoClient
                 console.PrintError("Registration was unsuccessful.");
             }
             console.Pause();
+        }
+        public void TransferOut()
+        {
+            ApiUser currentUser = null;
+            List<ApiUser> userList = tenmoApiService.GetUsers();
+            foreach (ApiUser user in userList)
+            {
+                if (user.Username == tenmoApiService.Username)
+                {
+                    userList.Remove(user);
+                    currentUser = user;
+                    break;
+                }
+            }
+            console.SendTEbucks(userList);
+            int enteredUserId = console.PromptForInteger("Enter User Id for receicpient. Cannot be your account 0 to cancle");
+            decimal enteredAmount = console.PromptForDecimal("Enter amount to send. Must be greater than 0 and less than current account balance");
+            Transfer newTransfer = new Transfer();
+            newTransfer.AccountFrom = currentUser.UserId;
+            newTransfer.AccountTo = enteredUserId;
+            newTransfer.Amount = enteredAmount;
+            try
+            {
+                tenmoApiService.PostTransferOut(newTransfer);
+                console.Pause("Transfer Complete\nPress any key to continue");
+
+
+            }
+            catch (HttpRequestException ex)
+            {
+                console.Pause("Unable to complete transfer.");
+            }
+
         }
     }
 }

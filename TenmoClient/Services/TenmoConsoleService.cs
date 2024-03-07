@@ -57,18 +57,71 @@ namespace TenmoClient.Services
         {
             Console.WriteLine($"Your current account balance is: ${balance}");
         }
+
         public void SendTEbucks(List<ApiUser> userList)
         {
-            Console.WriteLine("| -------------- Users ------------- |"+
-                              "| Id     | Username                  |"+
+            Console.WriteLine("| -------------- Users ------------- |\n"+
+                              "| Id     | Username                  |\n"+
                               "| -------+---------------------------|");
             foreach (ApiUser user in userList)
             {
-
-            Console.WriteLine($"| {user.UserId.ToString().PadRight(7)}| {user.Username.PadRight(27)}|");
+            Console.WriteLine($"| {user.UserId.ToString().PadRight(7)}| {user.Username.PadRight(26)}|");
             }
-            Console.WriteLine("|-----------------------------------|");
+            Console.WriteLine("|------------------------------------|\n");
+            
         }
+        
+        public void ViewPreviousTransfers(Dictionary<int, string[]> idToUsername,List<Transfer>transferList,int userId)
+        {
+            Console.WriteLine("-------------------------------------------" +
+                "\nTransfers\n" +
+                "ID          From/To                 Amount" +
+                "\n-------------------------------------------\n");
+            foreach (Transfer transfer in transferList)
+            {
+                Console.Write($"{transfer.TransferId.ToString().PadRight(12)}");
+                if (transfer.AccountFrom == userId)
+                {
+                    Console.Write($"To: {idToUsername[transfer.TransferId][0].PadRight(18)}");
+                }
+                else
+                {
+                    Console.Write($"From: {idToUsername[transfer.TransferId][0].PadRight(16)}");
+                }
+                Console.Write($"${addTrailingZero(transfer.Amount.ToString()).PadLeft(8)}\n");
+            }
 
+            //foreach (KeyValuePair<int, string[]>idAndUsername in idToUsername)
+            //{
+
+            //    Console.Write($"{idAndUsername.Key.ToString().PadRight(12)}");
+            //    if (idAndUsername.Key ==userId)
+            //    {
+            //        Console.Write($"From: {idAndUsername.Value[0].PadRight(23)}");
+            //    }
+            //    else
+            //    {
+            //        Console.Write($"To: {idAndUsername.Value[0].PadRight(23)}");
+            //    }
+            //    Console.Write($"${idAndUsername.Value[1].PadLeft(8)}\n");
+            //}
+        }
+        public string addTrailingZero(string amount)
+        {
+            try
+            {
+                string[] amountArray = amount.Split('.');
+                if (amountArray[1].Length == 1)
+                {
+                    amountArray[1] += "0";
+                }
+                return String.Join('.', amountArray);
+            }
+            catch (IndexOutOfRangeException)
+            {
+                return amount + ".00";
+            }
+
+        }
     }
 }

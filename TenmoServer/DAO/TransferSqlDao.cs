@@ -52,9 +52,103 @@ namespace TenmoServer.DAO
 
         }
 
-        public List<Transfer> ListTransfer(User user)
+        public IList<Transfer> ListCurrentUserTransfer(Account user)
         {
-            throw new System.NotImplementedException();
+            IList<Transfer> transfers = new List<Transfer>();
+
+            string SentTransferSql = "SELECT transfer_id, transfer.account_from, account_to, " +
+                "transfer_status_id, transfer_type_id, amount FROM transfer " +
+                "join account on account.account_id=transfer.account_from " +
+                "where account_from = @account_from";
+
+
+            string ReceivedTransferSql= "SELECT transfer_id, transfer.account_from, account_to, " +
+                "transfer_status_id, transfer_type_id, amount FROM transfer " +
+                "join account on account.account_id=transfer.account_to " +
+                "where account_to = @account_to";
+            //, password_hash, salt 
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+                    
+                    SqlCommand cmd = new SqlCommand(SentTransferSql, conn);
+                    cmd.Parameters.AddWithValue("@account_from", user.AccountId);
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    
+                    while (reader.Read())
+                    {
+                        Transfer transfer = MapRowToTransferGetTransfers(reader);
+                        transfers.Add(transfer);
+                    }
+                }
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    SqlCommand cmd = new SqlCommand(ReceivedTransferSql, conn);
+                    cmd.Parameters.AddWithValue("@account_to", user.AccountId);
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        Transfer transfer = MapRowToTransferGetTransfers(reader);
+                        transfers.Add(transfer);
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                throw new DaoException("SQL exception occurred", ex);
+            }
+            return transfers;
+
+        }
+        public Transfer GetTransferById(int id)
+        {
+            string sql = "  select * from transfer where transfer_id = @transfer_id";
+            Transfer newTransfer = new Transfer();
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    // create user
+                    SqlCommand cmd = new SqlCommand(sql, conn);
+                    cmd.Parameters.AddWithValue("@transfer_id", id);
+
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            newTransfer= MapRowToTransferGetTransfers(reader);
+                        }
+                    }
+
+                }
+
+            }
+            catch (SqlException ex)
+            {
+                throw new DaoException("SQL exception occurred", ex);
+            }
+
+            return newTransfer;
+
+        }
+        public Transfer MapRowToTransferGetTransfers(SqlDataReader reader)
+        {
+            Transfer transfer = new Transfer();
+            transfer.TransferId = Convert.ToInt32(reader["transfer_id"]);
+            transfer.AccountFrom = Convert.ToInt32(reader["account_from"]);
+            transfer.AccountTo = Convert.ToInt32(reader["account_to"]);
+            transfer.TransferStatusId = Convert.ToInt32(reader["transfer_status_id"]);
+            transfer.TransferTypeId = Convert.ToInt32(reader["transfer_type_id"]);
+            transfer.Amount = Convert.ToDecimal(reader["amount"]);
+            return transfer;
         }
     }
 }
