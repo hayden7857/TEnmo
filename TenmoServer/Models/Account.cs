@@ -5,5 +5,12 @@
         public int AccountId { get; set; }
         public int UserId { get; set; }
         public decimal Balance { get; set; }
+
+        //made for tests
+        public Account (int accountId, int userId, decimal balance)
+        {
+
+        }
+        public Account() { }
     }
 }
