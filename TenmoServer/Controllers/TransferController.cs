@@ -138,6 +138,10 @@ namespace TenmoServer.Controllers
             transfer.TransferId = id;
             try
             {
+                if (transfer.TransferStatusId==2&&transfer.Amount > accountDao.GetAccountByUsername(User.Identity.Name).Balance)
+                {
+                    throw new DaoException("Unable to approve tranfer");
+                }
                 Transfer updatedTransfer = transferDao.UpdateTransfer(transfer);
                 if (transfer.TransferStatusId == 2)
                 {
