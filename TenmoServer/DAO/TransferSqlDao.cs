@@ -178,6 +178,66 @@ namespace TenmoServer.DAO
             return newTransfer;
 
         }
+
+        public IList<Transfer> ListCurrentUserPendingTransfers(Account user)
+        {
+            IList<Transfer> transfers = new List<Transfer>();
+
+            string SentTransferSql = "SELECT transfer_id, transfer.account_from, account_to, transfer_status_id, " +
+                "transfer_type_id, amount FROM transfer join account on " +
+                "account.account_id = transfer.account_from where account_from = @account_from " +
+                "and transfer_status_id = 1";
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    SqlCommand cmd = new SqlCommand(SentTransferSql, conn);
+                    cmd.Parameters.AddWithValue("@account_from", user.AccountId);
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        Transfer transfer = MapRowToTransferGetTransfers(reader);
+                        transfers.Add(transfer);
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                throw new DaoException("SQL exception occurred", ex);
+            }
+            return transfers;
+
+        }
+        public Transfer UpdateTransfer(Transfer transfer)
+        {
+            string sql = "update transfer set transfer_status_id = @transfer_status_id where transfer_id = @transfer_id";
+            Transfer updatedTransfer = null;
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    SqlCommand cmd = new SqlCommand(sql, conn);
+                    cmd.Parameters.AddWithValue("@transfer_id", transfer.TransferId);
+                    cmd.Parameters.AddWithValue("@transfer_status_id", transfer.TransferStatusId);
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    if (rowsAffected == 0)
+                    {
+                        throw new DaoException("No changes made in database");
+                    }
+                    updatedTransfer = GetTransferById(transfer.TransferId);
+                }
+            }
+            catch (SqlException ex)
+            {
+                throw new DaoException("SQL exception occurred", ex);
+            }
+            return updatedTransfer;
+        }
         public Transfer MapRowToTransferGetTransfers(SqlDataReader reader)
         {
             Transfer transfer = new Transfer();

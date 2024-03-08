@@ -88,6 +88,8 @@ namespace TenmoClient
             if (menuSelection == 3)
             {
                 // View your pending requests
+                ViewPendingTransfers();
+                DecisionPendingTransfers();
             }
 
             if (menuSelection == 4)
@@ -292,6 +294,64 @@ namespace TenmoClient
             newTransfer.TransferTypeId = 1;
             tenmoApiService.PostTransferOut(newTransfer);
             console.Pause("Request sent.");
+        }
+        public void ViewPendingTransfers()
+        {
+            List<Transfer> pendingTransferList = tenmoApiService.GetPendingTransfers();
+
+            Dictionary<int, string[]> idToUsername = new Dictionary<int, string[]>();
+            foreach (Transfer transfer in pendingTransferList)
+            {
+                idToUsername[transfer.TransferId] = new string[] { tenmoApiService.GetUserById(transfer.AccountTo).Username, transfer.Amount.ToString() };
+
+            }
+            console.ViewPendingTransfersOut(pendingTransferList, idToUsername);
+        }
+        public void DecisionPendingTransfers()
+        {
+            int transferId = console.PromptForInteger("Please enter transfer ID to approve/reject (0 to cancel)");
+            if (transferId == 0)
+            {
+                return;
+            }
+            console.ViewPendingOptions();
+            int pendingOption = console.PromptForInteger("Please choose an option");
+            switch (pendingOption)
+            {
+                case 1:
+                    Transfer approvedTransfer = tenmoApiService.GetTransferById(transferId);
+                    if (tenmoApiService.GetAccount().Balance >= approvedTransfer.Amount)
+                    {
+                        approvedTransfer.TransferStatusId = 2;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Unable to approve transfer");
+                        console.Pause();
+                        return;
+                    }
+
+                    try
+                    {
+                        tenmoApiService.UpdateTranferApproved(approvedTransfer);
+                        console.Pause("Transfer approved.");
+                    }catch(HttpRequestException ex)
+                    {
+                        Console.WriteLine("Unable to approve transfer");
+                        console.Pause();
+                    }
+
+                    break;
+                case 2:
+                    Transfer rejectedTransfer = tenmoApiService.GetTransferById(transferId);
+                    rejectedTransfer.TransferStatusId = 3;
+                    tenmoApiService.UpdateTranferRejected(rejectedTransfer);
+                    console.Pause("Transfer rejected");
+                    break;
+                case 0:
+                    console.Pause("Returning to main menu.");
+                    break;
+            }
         }
     }
 

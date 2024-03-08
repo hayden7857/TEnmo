@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using TenmoServer.DAO;
 using TenmoServer.Exceptions;
@@ -103,6 +104,62 @@ namespace TenmoServer.Controllers
                 return NotFound();
             }
 
+        }
+
+        [Authorize]
+        [HttpGet("pending")]
+        public ActionResult<List<Transfer>> GetPendingTransfers()
+        {
+            IList<Transfer> transferList = new List<Transfer>();
+            try
+            {
+                transferList = transferDao.ListCurrentUserPendingTransfers(accountDao.GetAccountByUsername(User.Identity.Name));
+                foreach (Transfer transfer in transferList)
+                {
+                    Account fromAccount = accountDao.GetAccountByAccountId(transfer.AccountFrom);
+                    Account toAccount = accountDao.GetAccountByAccountId(transfer.AccountTo);
+                    transfer.AccountTo = toAccount.UserId;
+                    transfer.AccountFrom = fromAccount.UserId;
+                }
+
+            }
+            catch (DaoException ex)
+            {
+                return StatusCode(400, "Could not get transfer list");
+            }
+            return Ok(transferList);
+        }
+
+
+        [Authorize]
+        [HttpPut("{id}")]
+        public ActionResult ApproveOrRejectPendingTransfer(int id,Transfer transfer)
+        {
+            transfer.TransferId = id;
+            try
+            {
+                Transfer updatedTransfer = transferDao.UpdateTransfer(transfer);
+                if (transfer.TransferStatusId == 2)
+                {
+                    //update balance
+                    Account senderAccount = accountDao.GetAccountById(transfer.AccountFrom);
+                    if (senderAccount.Balance >= transfer.Amount && transfer.Amount > 0)
+                    {
+                        accountDao.UpdateReceiverAccount(transfer, accountDao.GetAccountById(transfer.AccountTo));
+                        accountDao.UpdateSenderAccount(transfer, accountDao.GetAccountById(transfer.AccountFrom));
+                    }
+                    else
+                    {
+                        return StatusCode(400, "Unable to complete tranfer");
+                    }
+
+
+                }
+            }catch(DaoException ex)
+            {
+                return NotFound();
+            }
+            return NoContent();
         }
     }
 }

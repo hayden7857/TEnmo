@@ -57,6 +57,29 @@ namespace TenmoClient.Services
             CheckForError(response, "Get Transfer by Id");
             return response.Data;
         }
+        public List<Transfer> GetPendingTransfers()
+        {
+            RestRequest request = new RestRequest("/transfer/pending");
+            IRestResponse<List<Transfer>> response = client.Get<List<Transfer>>(request);
+            CheckForError(response, "Get users");
+            return response.Data;
+        }
+        public Transfer UpdateTranferApproved(Transfer approvedTransfer)
+        {
+            RestRequest request = new RestRequest($"/transfer/{approvedTransfer.TransferId}");
+            request.AddJsonBody(approvedTransfer);
+            IRestResponse<Transfer> response = client.Put<Transfer>(request);
+            CheckForError(response, "Approve Transfer");
+            return response.Data;
+        }
+        public Transfer UpdateTranferRejected(Transfer approvedTransfer)
+        {
+            RestRequest request = new RestRequest($"/transfer/{approvedTransfer.TransferId}");
+            request.AddJsonBody(approvedTransfer);
+            IRestResponse<Transfer> response = client.Put<Transfer>(request);
+            CheckForError(response, "Reject Transfer");
+            return response.Data;
+        }
         private void CheckForError(IRestResponse response, string action)
         {
 

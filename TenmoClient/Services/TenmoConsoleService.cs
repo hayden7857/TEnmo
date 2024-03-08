@@ -104,6 +104,24 @@ namespace TenmoClient.Services
             Console.WriteLine($"Status: {transferDetails[4]}");
             Console.WriteLine($"Amount: ${addTrailingZero(transferDetails[5])}");
         }
+        public void ViewPendingTransfersOut(List<Transfer> pendingTransferList, Dictionary<int, string[]> idToUsername)
+        {
+            Console.WriteLine("-------------------------------------------" +
+                "\nPending Transfers\n" +
+                "ID          To                    Amount" +
+                "\n-------------------------------------------");
+            foreach (Transfer transfer in pendingTransferList)
+            {
+                Console.Write($"{transfer.TransferId.ToString().PadRight(12)}");
+                Console.Write($"From: {idToUsername[transfer.TransferId][0].PadRight(16)}");
+                Console.Write($"${addTrailingZero(transfer.Amount.ToString()).PadLeft(8)}\n");
+            }
+
+        }
+        public void ViewPendingOptions()
+        {
+            Console.WriteLine("1: Approve\r\n2: Reject\r\n0: Don't approve or reject\r\n---------");
+        }
         public string addTrailingZero(string amount)
         {
             try
