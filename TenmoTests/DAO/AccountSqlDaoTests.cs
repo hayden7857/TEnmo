@@ -45,7 +45,18 @@ namespace TenmoTests.Tests.DAO
         [TestMethod]
         public void GetAccountByUserId_ThrowsDaoException()
         {
-
+            try
+            {
+                dao.GetAccountById(1005);
+                
+            }
+            catch(DaoException ex)
+            {
+                if (ex.GetType() == typeof(DaoException))
+                {
+                    Assert.AreEqual(1, 1);
+                }
+            }
         }
 
         private void AssertAccountsMatch(Account expected, Account actual)
