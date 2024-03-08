@@ -3,6 +3,9 @@ using System;
 using System.Collections.Generic;
 using TenmoServer.Models;
 using TenmoServer.DAO;
+using TenmoServer.Exceptions;
+using System.Data.SqlTypes;
+using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 
 namespace TenmoTests.Tests.DAO
 {
@@ -15,6 +18,7 @@ namespace TenmoTests.Tests.DAO
         private static readonly Account ACCOUNT_2 = new Account(2002, 1002, 1000.00M);
 
         private AccountSqlDao dao;
+        //private AccountSqlDao invalidDao;
 
         private Account testAccount;
 
@@ -22,6 +26,7 @@ namespace TenmoTests.Tests.DAO
         public override void Setup()
         {
             dao = new AccountSqlDao(ConnectionString);
+            //invalidDao = new AccountSqlDao(InvalidConnectionString);
             testAccount = new Account(2003, 1003, 1000.00M);
             base.Setup();
         }
@@ -37,7 +42,11 @@ namespace TenmoTests.Tests.DAO
             
         }
 
+        [TestMethod]
+        public void GetAccountByUserId_ThrowsDaoException()
+        {
 
+        }
 
         private void AssertAccountsMatch(Account expected, Account actual)
         {
