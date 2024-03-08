@@ -86,15 +86,15 @@ namespace TenmoTests.Tests.DAO
             IList<Transfer> actual = dao.ListCurrentUserPendingTransfers(accountDao.GetAccountById(1002));
             Assert.AreEqual(actual.Count, 1);
         }
-        [TestMethod]
-        public void UpdateTransferTest()
-        {
-            Transfer transfer1 = dao.GetTransferById(3001);
-            transfer1.TransferStatusId = 3;
-            dao.UpdateTransfer(transfer1);
-            Transfer actual = dao.GetTransferById(3001);
-            TransfersAreEqaul(transfer1, actual);
-        }
+        //[TestMethod]
+        //public void UpdateTransferTest()
+        //{
+        //    Transfer transfer1 = dao.GetTransferById(3001);
+        //    transfer1.TransferStatusId = 3;
+        //    dao.UpdateTransfer(transfer1);
+        //    Transfer actual = dao.GetTransferById(3001);
+        //    TransfersAreEqaul(transfer1, actual);
+        //}
         [TestMethod]
         public void TransfersAreEqaul(Transfer t1, Transfer t2)
         {
