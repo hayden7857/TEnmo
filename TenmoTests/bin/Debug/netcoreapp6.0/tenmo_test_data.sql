@@ -54,22 +54,29 @@ INSERT INTO transfer_type (transfer_type_desc) VALUES ('Request');
 INSERT INTO transfer_type (transfer_type_desc) VALUES ('Send');
 
 --need users to make accounts
+--SET IDENTITY_INSERT tenmo_user OFF
 INSERT INTO tenmo_user (username, password_hash, salt)
 VALUES ('tester 1', 'x', 'x'), --id will be 1001
 	   ('tester 2', 'x', 'x'); --id will be 1002
+--SET IDENTITY_INSERT tenmo_user ON
 
 --need accounts to make transfers
-INSERT INTO account (account_id,user_id, balance)
-VALUES (2001,1001, 1000.00), -- id will be 2001
-	   (2002,1002, 1000.00); -- id will be 2002
+--SET IDENTITY_INSERT account ON
+INSERT INTO account (user_id, balance)
+VALUES (1001, 1000.00), -- id will be 2001
+	   (1002, 1000.00); -- id will be 2002
+--SET IDENTITY_INSERT account OFF
 
+--need tranfers to test against
+--SET IDENTITY_INSERT transfer OFF
 INSERT INTO transfer (transfer_type_id, transfer_status_id, account_from, account_to, amount)
-VALUES (2, 2, 2001, 2002, 50.00), -- id will be 3001
+VALUES ( 2, 2, 2001, 2002, 50.00), -- id will be 3001
 	   (2, 2, 2002, 2001, 100.00), -- id will be 3002
 	   (1, 1, 2001, 2002, 75.00), -- id will be 3003
 	   (1, 1, 2002, 2001, 25.00); -- id will be 3004
+--SET IDENTITY_INSERT transfer ON
+
 
 COMMIT TRANSACTION
-
 
 
