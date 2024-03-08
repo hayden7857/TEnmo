@@ -9,7 +9,9 @@
         //made for tests
         public Account (int accountId, int userId, decimal balance)
         {
-
+            AccountId = accountId;
+            UserId = userId;
+            Balance = balance;
         }
         public Account() { }
     }
