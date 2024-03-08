@@ -59,9 +59,9 @@ VALUES ('tester 1', 'x', 'x'), --id will be 1001
 	   ('tester 2', 'x', 'x'); --id will be 1002
 
 --need accounts to make transfers
-INSERT INTO account (user_id, balance)
-VALUES (1001, 1000.00), -- id will be 2001
-	   (1002, 1000.00); -- id will be 2002
+INSERT INTO account (account_id,user_id, balance)
+VALUES (2001,1001, 1000.00), -- id will be 2001
+	   (2002,1002, 1000.00); -- id will be 2002
 
 INSERT INTO transfer (transfer_type_id, transfer_status_id, account_from, account_to, amount)
 VALUES (2, 2, 2001, 2002, 50.00), -- id will be 3001
