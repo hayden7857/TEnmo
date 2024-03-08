@@ -23,7 +23,6 @@ node_modules
 !TechElevator*.dll
 *.lib
 *.sbr
-bin/
 obj/
 packages/
 .vs/
