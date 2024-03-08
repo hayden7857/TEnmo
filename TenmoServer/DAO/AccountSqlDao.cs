@@ -115,10 +115,7 @@ namespace TenmoServer.DAO
             }
             return account;
         }
-        public Account CreateAccount(User user)
-        {
-            throw new NotImplementedException();
-        }
+
         public Account UpdateSenderAccount(Transfer transfer,Account account)
         {
             string sql = "update account set balance=@balance where account_id=@account_id";

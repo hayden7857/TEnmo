@@ -7,6 +7,16 @@
         public string PasswordHash { get; set; }
         public string Salt { get; set; }
         public string Email { get; set; }
+
+        public User () { }
+
+        public User (int userId, string username, string passwordHash, string salt)
+        {
+            UserId = userId;
+            Username = username;
+            PasswordHash = passwordHash;
+            Salt = salt;
+        }
     }
 
     /// <summary>
